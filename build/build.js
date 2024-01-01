@@ -61,33 +61,20 @@ var PolygonHelper = (function () {
     };
     return PolygonHelper;
 }());
-var numberOfShapesControl;
-function setup() {
-    console.log("🚀 - Setup initialized - P5 is running");
-    createCanvas(windowWidth, windowHeight);
-    rectMode(CENTER).noFill().frameRate(30);
-    numberOfShapesControl = createSlider(1, 30, 15, 1).position(10, 10).style("width", "100px");
+var geode;
+function preload() {
+    geode = loadImage("assets/geode.png");
 }
-function windowResized() {
-    resizeCanvas(windowWidth, windowHeight);
+function setup() {
+    createCanvas(800, 800);
+    stroke(50);
+    strokeWeight(5);
+    rectMode(RADIUS);
+    noFill();
 }
 function draw() {
-    background(0);
-    translate(width / 2, height / 2);
-    var numberOfShapes = numberOfShapesControl.value();
-    var colours = ColorHelper.getColorsArray(numberOfShapes);
-    var speed = (frameCount / (numberOfShapes * 30)) * 2;
-    for (var i = 0; i < numberOfShapes; i++) {
-        push();
-        var lineWidth = 8;
-        var spin = speed * (numberOfShapes - i);
-        var numberOfSides = 3 + i;
-        var width_1 = 40 * i;
-        strokeWeight(lineWidth);
-        stroke(colours[i]);
-        rotate(spin);
-        PolygonHelper.draw(numberOfSides, width_1);
-        pop();
-    }
+    background(200);
+    translate(400, 400);
+    image(geode, -geode.width / 2, -geode.height / 2);
 }
 //# sourceMappingURL=build.js.map
