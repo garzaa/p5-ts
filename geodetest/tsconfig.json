@@ -1,14 +1,7 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "module": "none",
-    "noImplicitAny": true,
     "outFile": "../build/build.js",
-    "preserveConstEnums": true,
-    "removeComments": true,
-    "rootDirs": ["./", "../lib"],
-    "sourceMap": true,
-    "target": "es6",
-    "moduleResolution": "node"
   },
   "include": ["../"]
 }
