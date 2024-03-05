@@ -11,7 +11,13 @@ function draw(): void {
 	background(200);
 	stroke(50);
 	strokeWeight(1);
-	grid.apply(drawCell)
+	grid.apply(drawCell);
+
+	let v: vec2 = grid.rows[5][5].worldCoords;
+	stroke("#ff0000");
+	ellipse(v.x, v.y, 10, 10);
+	let neighbors: Cell[] = grid.rows[5][5].getNeighbors();
+	neighbors.forEach(x => debugCell(x as HexCell));
 }
 
 function drawCell(cell: HexCell): void {
@@ -21,4 +27,9 @@ function drawCell(cell: HexCell): void {
 		vertex(points[i].x, points[i].y);
 	}
 	endShape(CLOSE);
+}
+
+function debugCell(cell: HexCell): void {
+	stroke("#ff00ff")
+	ellipse(cell.worldCoords.x, cell.worldCoords.y, 10, 10);
 }

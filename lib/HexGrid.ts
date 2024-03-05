@@ -7,6 +7,7 @@ class HexGrid {
 	readonly origin: vec2;
 	readonly rows: HexCell[][];
 	readonly sideLength: number;
+	readonly gridSize: vec2;
 
 	constructor(origin: vec2, gridSize: vec2, cellHeight: number) {
 		// set up everything
@@ -14,6 +15,7 @@ class HexGrid {
 		this.cellRadius = this.cellSize.scale(0.5);
 		this.rows = [];
 		this.sideLength = cellHeight/2;
+		this.gridSize = gridSize;
 
 		// ok now create the start point
 		// this depends on how many rows are in the grid
@@ -27,7 +29,7 @@ class HexGrid {
 			let row = [];
 			for (let y=0; y<gridSize.y; y++) {
 				let gridPos = new vec2(x, y);
-				row.push(new HexCell(gridPos, this.cellToWorld(gridPos), this.cellRadius));
+				row.push(new HexCell(gridPos, this.cellToWorld(gridPos), this.cellRadius, this));
 			}
 			this.rows.push(row);
 		}
@@ -55,15 +57,17 @@ class HexGrid {
 }
 
 class HexCell extends Cell {
-	gridCoords: vec2;
-	worldCoords: vec2;
-	radius: vec2;
+	readonly gridCoords: vec2;
+	readonly worldCoords: vec2;
+	readonly radius: vec2;
+	readonly grid: HexGrid;
 
-	constructor(gridCoords: vec2, worldCoords: vec2, radius: vec2) {
+	constructor(gridCoords: vec2, worldCoords: vec2, radius: vec2, grid: HexGrid) {
 		super();
 		this.gridCoords = gridCoords;
 		this.worldCoords = worldCoords;
 		this.radius = radius;
+		this.grid = grid;
 	}
 
 	getPoints(): vec2[] {
@@ -103,6 +107,20 @@ class HexCell extends Cell {
 		}
 
 		let neighbors: Cell[] = [];
+		for (let i=0; i<neighborCoords.length-1; i+= 2) {
+			let gridCoords: vec2 = new vec2(
+				this.gridCoords.x + neighborCoords[i],
+				this.gridCoords.y + neighborCoords[i+1]
+			);
+			if (
+				gridCoords.x >= 0
+				&& gridCoords.x < this.grid.gridSize.x
+				&& gridCoords.y >= 0
+				&& gridCoords.y < this.grid.gridSize.y
+			) {
+				neighbors.push(grid.rows[gridCoords.x][gridCoords.y]);
+			}
+		}
 		return neighbors;
 	}
 }
