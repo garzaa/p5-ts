@@ -2,11 +2,11 @@
  * @description Creates a grid of pointy-top hexagons
  */
 class HexGrid {
-	cellSize: vec2;
-	cellRadius: vec2;
-	origin: vec2;
-	rows: HexCell[][];
-	sideLength: number;
+	readonly cellSize: vec2;
+	readonly cellRadius: vec2;
+	readonly origin: vec2;
+	readonly rows: HexCell[][];
+	readonly sideLength: number;
 
 	constructor(origin: vec2, gridSize: vec2, cellHeight: number) {
 		// set up everything
@@ -54,12 +54,13 @@ class HexGrid {
 	}
 }
 
-class HexCell {
+class HexCell extends Cell {
 	gridCoords: vec2;
 	worldCoords: vec2;
 	radius: vec2;
 
 	constructor(gridCoords: vec2, worldCoords: vec2, radius: vec2) {
+		super();
 		this.gridCoords = gridCoords;
 		this.worldCoords = worldCoords;
 		this.radius = radius;
@@ -75,5 +76,33 @@ class HexCell {
 		}
 
 		return points;
+	}
+
+	getNeighbors(): Cell[] {
+		let odd = this.gridCoords.y % 2 == 1;
+		let neighborCoords: number[] = [];
+		
+		if (odd) {
+			neighborCoords.push(
+				1, 0,
+				1, 1, 
+				0, 1,
+				-1, 0,
+				0, -1, 
+				1, -1
+			)
+		} else {
+			neighborCoords.push(
+				1, 0,
+				0, 1,
+				-1, 1,
+				-1, 0,
+				-1, -1,
+				0, -1
+			)
+		}
+
+		let neighbors: Cell[] = [];
+		return neighbors;
 	}
 }

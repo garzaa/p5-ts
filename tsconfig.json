@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "none",
+    "module": "None",
     "noImplicitAny": true,
     "outFile": "./build/build.js",
     "preserveConstEnums": true,
