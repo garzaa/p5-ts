@@ -1,7 +1,7 @@
 let grid: HexGrid;
 
 function setup(): void {
-	grid = new HexGrid(new vec2(200, 200), new vec2(6, 6), 100);
+	grid = new HexGrid(new vec2(100, 100), new vec2(6, 6), 100);
 	createCanvas(800, 800);
 	noLoop();
 }
