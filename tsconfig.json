@@ -5,7 +5,6 @@
     "outFile": "./build/build.js",
     "preserveConstEnums": true,
     "removeComments": true,
-    "rootDir": "./",
     "sourceMap": true,
     "target": "es6",
     "moduleResolution": "node"
