@@ -1,4 +1,4 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["./", "../lib/", "../p5"]
+  "include": ["./", "../lib/Cell.ts", "../lib/", "../p5"]
 }
