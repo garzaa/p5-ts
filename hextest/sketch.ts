@@ -5,12 +5,18 @@ const drawBorders = false;
 const drawWalls = true;
 const drawCoords = false;
 
+let theShader: p5.Shader;
+
+function preload(): void {
+	theShader = loadShader("../assets/shaders/basic.vert", "../assets/shaders/basic.frag");
+}
+
 function setup(): void {
-	createCanvas(800, 800);
+	createCanvas(800, 800, WEBGL);
 	noLoop();
 	textAlign(CENTER);
 	textSize(14);
-	pixelDensity(1);
+	pixelDensity(2);
 
 	grid = new HexGrid(new vec2(100, 100), new vec2(6, 6), 100);
 	const allCells = grid.getAllCells();
@@ -19,10 +25,14 @@ function setup(): void {
 }
 
 function draw(): void {
+	theShader.setUniform('u_resolution', [width, height]);
+	shader(theShader);
+
 	noFill();
 	background(200);
 	stroke(50);
 	strokeWeight(1);
+
 	grid.apply(drawCell);
 }
 
