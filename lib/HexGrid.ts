@@ -84,7 +84,7 @@ class HexCell extends Cell {
 
 	/**
 	 * 
-	 * @returns points in a clockwise order, starting from the top
+	 * @returns points in a clockwise order, starting from the top right
 	 */
 	getPoints(): vec2[] {
 		let points: vec2[] = [];
