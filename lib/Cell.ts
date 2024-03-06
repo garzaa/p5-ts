@@ -1,5 +1,5 @@
 abstract class Cell {
-	connections: Set<Cell>;	
+	connections: Set<Cell> = new Set<Cell>();	
 	getConnections(): Set<Cell> {
 		return this.connections;
 	}

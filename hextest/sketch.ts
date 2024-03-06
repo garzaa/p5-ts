@@ -1,9 +1,13 @@
 let grid: HexGrid;
 
 function setup(): void {
-	grid = new HexGrid(new vec2(100, 100), new vec2(6, 6), 100);
 	createCanvas(800, 800);
 	noLoop();
+
+	grid = new HexGrid(new vec2(100, 100), new vec2(6, 6), 100);
+	const allCells = grid.getAllCells();
+	const startCell = allCells[Math.floor(Math.random() * allCells.length)];
+	carveMaze(startCell);
 }
 
 function draw(): void {

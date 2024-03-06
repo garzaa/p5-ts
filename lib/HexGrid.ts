@@ -54,6 +54,18 @@ class HexGrid {
 			}
 		}
 	}
+
+	getAllCells(): Cell[] {
+		const cells: Cell[] = [];
+
+		this.rows.forEach(row => {
+			row.forEach(c => {
+				cells.push(c);
+			})
+		});
+
+		return cells;
+	}
 }
 
 class HexCell extends Cell {
