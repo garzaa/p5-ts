@@ -118,7 +118,7 @@ class HexCell extends Cell {
 				&& gridCoords.y >= 0
 				&& gridCoords.y < this.grid.gridSize.y
 			) {
-				neighbors.push(grid.rows[gridCoords.x][gridCoords.y]);
+				neighbors.push(this.grid.rows[gridCoords.x][gridCoords.y]);
 			}
 		}
 		return neighbors;

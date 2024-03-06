@@ -2,11 +2,11 @@ let geode: p5.Image;
 
 // ok so you can't have any imports...weird
 
-export function preload() {
+function preload() {
   geode = loadImage("./assets/geode.png");
 }
 
-export function setup() {
+function setup() {
   createCanvas(800, 800);
   stroke(50);
   strokeWeight(5);
@@ -14,7 +14,7 @@ export function setup() {
   noFill();
 }
 
-export function draw() {
+function draw() {
   background(200);
   translate(400, 400);
   image(geode, -geode.width/2, -geode.height/2);
