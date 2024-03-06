@@ -3,7 +3,7 @@ let theShader: p5.Shader;
 
 function preload(){
   // load the shader
-  theShader = loadShader('../assets/shaders/basic.vert', '../assets/shaders/basic.frag');
+  theShader = loadShader('../sketches/shadertest/basic.vert', '../sketches/shadertest/basic.frag');
 }
 
 function setup() {

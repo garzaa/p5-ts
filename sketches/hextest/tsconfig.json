@@ -1,0 +1,4 @@
+{
+  "extends": "../../tsconfig.json.template",
+  "include": ["./", "../../lib/Cell.ts", "../../lib/", "../../p5"]
+}
