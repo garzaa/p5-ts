@@ -61,6 +61,7 @@ class HexCell extends Cell {
 	readonly worldCoords: vec2;
 	readonly radius: vec2;
 	readonly grid: HexGrid;
+	readonly odd: boolean;
 
 	constructor(gridCoords: vec2, worldCoords: vec2, radius: vec2, grid: HexGrid) {
 		super();
@@ -68,6 +69,7 @@ class HexCell extends Cell {
 		this.worldCoords = worldCoords;
 		this.radius = radius;
 		this.grid = grid;
+		this.odd = this.gridCoords.y % 2 == 1;
 	}
 
 	getPoints(): vec2[] {
@@ -83,10 +85,9 @@ class HexCell extends Cell {
 	}
 
 	getNeighbors(): Cell[] {
-		let odd = this.gridCoords.y % 2 == 1;
 		let neighborCoords: number[] = [];
 		
-		if (odd) {
+		if (this.odd) {
 			neighborCoords.push(
 				1, 0,
 				1, 1, 
