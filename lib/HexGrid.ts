@@ -69,8 +69,6 @@ class HexGrid {
 }
 
 class HexCell extends Cell {
-	readonly gridCoords: vec2;
-	readonly worldCoords: vec2;
 	readonly radius: vec2;
 	readonly grid: HexGrid;
 	readonly odd: boolean;
@@ -84,6 +82,10 @@ class HexCell extends Cell {
 		this.odd = this.gridCoords.y % 2 == 1;
 	}
 
+	/**
+	 * 
+	 * @returns points in a clockwise order, starting from the top
+	 */
 	getPoints(): vec2[] {
 		let points: vec2[] = [];
 		// add the points from all the world coords

@@ -1,7 +1,5 @@
 let geode: p5.Image;
 
-// ok so you can't have any imports...weird
-
 function preload() {
   geode = loadImage("./assets/geode.png");
 }
