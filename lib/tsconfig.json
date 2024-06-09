@@ -1,0 +1,4 @@
+{
+	"include": ["./", "../p5/global.d.ts"]
+  }
+  

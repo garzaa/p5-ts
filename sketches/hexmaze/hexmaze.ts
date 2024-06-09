@@ -1,39 +1,43 @@
 let grid: HexGrid;
 
-const drawConnections = true;
+const drawConnections = false;
 const drawBorders = false;
 const drawWalls = true;
 const drawCoords = false;
+const distortStrength = 1;
 
-let theShader: p5.Shader;
+const canvasSize = 1000;
+const canvasMiddle: vec2 = new vec2(canvasSize/2, canvasSize/2);
 
-function preload(): void {
-	theShader = loadShader("../assets/shaders/basic.vert", "../assets/shaders/basic.frag");
-}
+let pg: p5.Graphics;
 
 function setup(): void {
-	createCanvas(800, 800, WEBGL);
+	createCanvas(canvasSize, canvasSize);
 	noLoop();
 	textAlign(CENTER);
 	textSize(14);
-	pixelDensity(2);
+	pixelDensity(1);
 
-	grid = new HexGrid(new vec2(100, 100), new vec2(6, 6), 100);
+	pg = createGraphics(canvasSize, canvasSize);
+	
+	grid = new HexGrid(new vec2(200, 200), new vec2(30, 35), 25);
 	const allCells = grid.getAllCells();
 	const startCell = allCells[Math.floor(Math.random() * allCells.length)];
 	carveMaze(startCell);
 }
 
 function draw(): void {
-	theShader.setUniform('u_resolution', [width, height]);
-	shader(theShader);
-
+	background(10);
+	stroke(200);
+	pg.strokeWeight(3);
 	noFill();
-	background(200);
-	stroke(50);
-	strokeWeight(1);
-
+	
 	grid.apply(drawCell);
+	translate(-50, -50);
+	image(pg, 0, 0, canvasSize, canvasSize);
+	filter(BLUR, 5);
+	translate(-50, -50);
+	image(pg, 0, 0, canvasSize, canvasSize);
 }
 
 function drawCell(cell: HexCell): void {
@@ -53,7 +57,7 @@ function drawCell(cell: HexCell): void {
 		push();
 			stroke("#ff0000");
 			cell.getConnections().forEach(conn => {
-				line(cell.worldCoords.x, cell.worldCoords.y, conn.worldCoords.x, conn.worldCoords.y);
+				vec2lineD(cell.worldCoords, conn.worldCoords);
 			})
 		pop();
 	}
@@ -71,31 +75,31 @@ function drawCell(cell: HexCell): void {
 		push();
 			if (cell.gridCoords.y == 0){
 				// if it's at the top row, always draw the top two
-				vec2line(points[4], points[5]);
-				vec2line(points[5], points[0]);
+				vec2lineD(points[4], points[5]);
+				vec2lineD(points[5], points[0]);
 			} else if (cell.gridCoords.y == grid.gridSize.y-1) {
 				// same for bottom two
-				vec2line(points[1], points[2]);
-				vec2line(points[2], points[3]);
+				vec2lineD(points[1], points[2]);
+				vec2lineD(points[2], points[3]);
 			}
 
 			if (cell.gridCoords.x == 0) {
-				vec2line(points[3], points[4]);
+				vec2lineD(points[3], points[4]);
 				if (!cell.odd) {
-					vec2line(points[2], points[3]);
-					vec2line(points[4], points[5]);
+					vec2lineD(points[2], points[3]);
+					vec2lineD(points[4], points[5]);
 				}
 			} else if (cell.gridCoords.x == grid.gridSize.x-1) {
 				if (cell.odd) {
-					vec2line(points[5], points[0]);
-					vec2line(points[1], points[2]);
+					vec2lineD(points[5], points[0]);
+					vec2lineD(points[1], points[2]);
 				}
-				vec2line(points[0], points[1]);
+				vec2lineD(points[0], points[1]);
 			}
 		
 			cell.getUnconnectedNeighbors().forEach(n => {
 				// only draw walls on the left three
-				if (n.worldCoords.x > cell.worldCoords.x) return;
+			if (n.worldCoords.x > cell.worldCoords.x) return;
 
 				// midpoint between the two
 				let dir: vec2 = cell.worldCoords.sub(n.worldCoords);
@@ -109,8 +113,8 @@ function drawCell(cell: HexCell): void {
 				let ortho: vec2 = new vec2(dir.y, -dir.x).scale(sqrt(3)/6);
 				let start: vec2 = midpoint.add(ortho.scale(-1));
 				let end: vec2 = midpoint.add(ortho);
-				stroke(20);
-				line(start.x, start.y, end.x, end.y);
+				stroke(200);
+				vec2lineD(start, end);
 			})
 		pop();
 	}
@@ -119,4 +123,23 @@ function drawCell(cell: HexCell): void {
 function debugCell(cell: HexCell): void {
 	stroke("#ffff00")
 	ellipse(cell.worldCoords.x, cell.worldCoords.y, 10, 10);
+}
+
+function vec2lineD(start: vec2, end: vec2) {
+	pg.beginShape();
+	let distanceFromMiddle: number = sqrt(abs(canvasMiddle.sub(start).sqrMagnitude()));
+	let totalPossibleDistance: number = canvasSize/2 - 100; // since it's an 800px canvas and there's a 100px margin
+	let closenessToMiddle: number = abs(1 - (distanceFromMiddle/totalPossibleDistance));
+	console.log(closenessToMiddle);
+	pg.stroke(255);
+	for (let i=0; i<20; i++) {
+		let v: vec2 = new vec2(lerp(start.x, end.x, i/19), lerp(start.y, end.y, i/19));
+		distanceFromMiddle = sqrt(abs(canvasMiddle.sub(v).sqrMagnitude()));
+		totalPossibleDistance = canvasSize/2 - 100; // since it's an 800px canvas and there's a 100px margin
+		closenessToMiddle = max(1 - (distanceFromMiddle/totalPossibleDistance), 0);
+		v = v.distort(0, 0.001, 100 * closenessToMiddle * distortStrength);
+		v = v.distort(0, 0.002, 150 * closenessToMiddle * distortStrength);
+		pg.vertex(v.x, v.y);
+	}
+	pg.endShape();
 }
