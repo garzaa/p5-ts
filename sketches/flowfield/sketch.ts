@@ -23,8 +23,8 @@ const fieldTree = new Quadtree<Circle>({
 })
 
 function setup(): void {
-	// @ts-expect-error
-	createCanvas(sizeX, sizeY, exportSVG ? SVG : P2D, null);
+	//@ts-expect-error
+	createCanvas(sizeX, sizeY, SVG);
 	noLoop();
 	strokeWeight(4);
 	stroke(50);
