@@ -1,12 +1,13 @@
 // import { Quadtree } from "@timohausmann/quadtree-ts"
 // import { Circle } from "@timohausmann/quadtree-ts";
 
-const pointSpacing = 500;
-const noiseScale = 1;
-const collisionSize = 10;
-const pointDistance = 100;
+const pointSpacing = 40;
+const noiseScale = 0.001;
+const collisionSize = 4;
+const pointDistance = 4;
+const margin = 0;
 
-const fieldTree = new Quadtree({
+const fieldTree = new Quadtree<Circle>({
 	width: 800,
 	height: 800,
 	x: 0,
@@ -27,9 +28,9 @@ function setup(): void {
 function draw(): void {
 	console.log("unga bunga!");
 	background(200);
-	for (let x=100; x<700; x+=pointSpacing) {
-		for (let y=100; y<700; y+=pointSpacing) {
-			ellipse(x, y, 50, 50);
+	for (let x=margin; x<=800-margin; x+=pointSpacing) {
+		for (let y=margin; y<=800-margin; y+=pointSpacing) {
+			// ellipse(x, y, 50, 50);
 			// draw until it's either:
 			// 1. out of bounds
 			// 2. intersecting
@@ -50,7 +51,8 @@ function draw(): void {
 				}));
 
 				// then sample noise to determine next direction
-				let ang = noise(px * noiseScale, py * noiseScale) * TWO_PI;
+				let noiseVariance = 1 + map(noise(px * noiseScale, py * noiseScale, 1000), 0, 1, -1, 1);
+				let ang = noise(px * noiseScale * noiseVariance, py * noiseScale * noiseVariance) * TWO_PI;
 				// move in the direction * 4 px
 				px += cos(ang) * pointDistance;
 				py += sin(ang) * pointDistance;
@@ -58,16 +60,14 @@ function draw(): void {
 			endShape();
 			// add the line to the collision quadtree
 			for (let i=0; i<lineCollision.length; i++) {
-				console.log("adding new vertex point")
 				fieldTree.insert(lineCollision[i]);
-				ellipse(lineCollision[i].x, lineCollision[i].y, collisionSize, collisionSize);
+				// ellipse(lineCollision[i].x, lineCollision[i].y, collisionSize, collisionSize);
 			}
 		}
 	}
 }
 
 function canMakePoint(xPos: number, yPos: number, v: number): boolean {
-	console.log("checking "+xPos+", "+yPos+", "+collisionSize);
 	// TODO: this is returning everything??
 	// right beacuse the tree hasnt split yet
 	// ok so now just test those for collision. great
@@ -77,10 +77,17 @@ function canMakePoint(xPos: number, yPos: number, v: number): boolean {
 		y: yPos,
 		r: collisionSize
 	}));
-	
-	let hasOverlap: boolean = overlap.length > 0;
-	if (hasOverlap) console.log(overlap);
 
+	let hasOverlap = false;
+
+	for (let circle of overlap) {
+		let distance = circle.r + collisionSize;
+		if ((abs(xPos - circle.x) < distance) && (abs(yPos - circle.y) < distance)) {
+			hasOverlap = true;
+			break;
+		}
+	}
+	
 	return xPos >= 0 && xPos <= 800
 		&& yPos >= 0 && yPos <= 800
 		&& v < 50
