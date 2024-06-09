@@ -23,7 +23,8 @@ const fieldTree = new Quadtree<Circle>({
 })
 
 function setup(): void {
-	//@ts-expect-error
+	// need this in order to make p5-types play nice with the injected SVG renderer
+	// @ts-expect-error
 	createCanvas(sizeX, sizeY, SVG);
 	noLoop();
 	strokeWeight(4);
