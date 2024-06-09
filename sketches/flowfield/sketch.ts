@@ -35,7 +35,6 @@ function setup(): void {
 }
 
 function draw(): void {
-	console.log("unga bunga!");
 	for (let x=margin; x<=sizeX-margin; x+=pointSpacing/2 * (noise(x))) {
 		for (let y=margin; y<=sizeY-margin; y+=pointSpacing * noise(x, y)) {
 			// ellipse(x, y, 50, 50);
