@@ -1,5 +1,5 @@
 function carveMaze(startCell: Cell) {
-	const visited = new Set<Cell>();
+const visited = new Set<Cell>();
 	const stack: Cell[] = [];
 
 	visited.add(startCell);

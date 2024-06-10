@@ -99,7 +99,7 @@ function drawCell(cell: HexCell): void {
 		
 			cell.getUnconnectedNeighbors().forEach(n => {
 				// only draw walls on the left three
-			if (n.worldCoords.x > cell.worldCoords.x) return;
+				if (n.worldCoords.x > cell.worldCoords.x) return;
 
 				// midpoint between the two
 				let dir: vec2 = cell.worldCoords.sub(n.worldCoords);

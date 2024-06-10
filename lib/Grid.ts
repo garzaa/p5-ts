@@ -89,4 +89,16 @@ class SquareCell extends Cell {
 
 		return neighbors;
 	}
+
+	/**
+	 * @returns points in a clockwise order, starting from top left
+	 */
+	getPoints() : vec2[] {
+		let points: vec2[] = [];
+		points.push(this.worldCoords.add(new vec2(-this.radius.x, -this.radius.y)));
+		points.push(this.worldCoords.add(new vec2(this.radius.x, -this.radius.y)));
+		points.push(this.worldCoords.add(new vec2(this.radius.x, this.radius.y)));
+		points.push(this.worldCoords.add(new vec2(-this.radius.x, this.radius.y)));
+		return points;
+	}
 }
