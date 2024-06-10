@@ -60,7 +60,7 @@ function draw(): void {
 
 				// then sample noise to determine next direction
 				let noiseVariance = 1 + 0.5*map(noise(px * noiseScale, py * noiseScale, 1000), 0, 1, -1, 10);
-				let ang = PI/2 + (PI*(0.75)*(noise(px * noiseScale * noiseVariance, py * noiseScale * noiseVariance)*2 - 1);
+				let ang = PI/2 + (PI*(0.75)*(noise(px * noiseScale * noiseVariance, py * noiseScale * noiseVariance)*2 - 1));
 				// then move the angle towards down??
 				// move in the direction * 4 px
 				px += cos(ang) * pointDistance;
