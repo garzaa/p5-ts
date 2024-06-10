@@ -3,13 +3,13 @@
 
 const dpi = 96;
 const sizeX = 6 * dpi;
-const sizeY = 6 * dpi;
+const sizeY = 18 * dpi;
 
 const pointSpacing = 50;
-const noiseScale = 0.0005;
+const noiseScale = 0.001;
 const collisionSize = 5;
-const pointDistance = 4;
-const margin = 10;
+const pointDistance = 2;
+const margin = 1 * dpi;
 const maxVertices = 100;
 
 const exportSVG = true;
@@ -24,8 +24,9 @@ const fieldTree = new Quadtree<Circle>({
 
 function setup(): void {
 	// need this in order to make p5-types play nice with the injected SVG renderer
-	// @ts-expect-error
-	createCanvas(sizeX, sizeY, SVG);
+	// @ts-ignore
+	// createCanvas(sizeX, sizeY, SVG);
+	createCanvas(sizeX, sizeY);
 	noLoop();
 	strokeWeight(4);
 	stroke(50);
@@ -60,7 +61,7 @@ function draw(): void {
 
 				// then sample noise to determine next direction
 				let noiseVariance = 1 + 0.5*map(noise(px * noiseScale, py * noiseScale, 1000), 0, 1, -1, 10);
-				let ang = PI/2 + (PI*(0.75 * (1+noiseVariance/5)))*(noise(px * noiseScale * noiseVariance, py * noiseScale * noiseVariance)*2 - 1);
+				let ang = PI/2 + (PI*(0.75)*(noise(px * noiseScale * noiseVariance, py * noiseScale * noiseVariance)*2 - 1);
 				// then move the angle towards down??
 				// move in the direction * 4 px
 				px += cos(ang) * pointDistance;
@@ -81,6 +82,7 @@ function draw(): void {
 			endShape();
 		}
 	}
+	// save("output.svg");
 }
 
 function canMakePoint(xPos: number, yPos: number, v: number): boolean {
