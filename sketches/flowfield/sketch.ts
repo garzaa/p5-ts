@@ -1,6 +1,3 @@
-// import { Quadtree } from "@timohausmann/quadtree-ts"
-// import { Circle } from "@timohausmann/quadtree-ts";
-
 const dpi = 96;
 const sizeX = 6 * dpi;
 const sizeY = 18 * dpi;

@@ -1,5 +1,5 @@
 abstract class Cell {
-	connections: Set<Cell> = new Set<Cell>();	
+	readonly connections: Set<Cell> = new Set<Cell>();
 	getConnections(): Cell[] {
 		return Array.from(this.connections);
 	}

@@ -1,21 +1,20 @@
 /**
  * @description Creates a grid of pointy-top hexagons
  */
-class HexGrid {
+class HexGrid extends Grid {
 	readonly cellSize: vec2;
 	readonly cellRadius: vec2;
 	readonly origin: vec2;
 	readonly rows: HexCell[][];
 	readonly sideLength: number;
-	readonly gridSize: vec2;
 
 	constructor(origin: vec2, gridSize: vec2, cellHeight: number) {
+		super(origin, gridSize, cellHeight);
 		// set up everything
 		this.cellSize = new vec2((cellHeight/2) * sqrt(3), cellHeight)
 		this.cellRadius = this.cellSize.scale(0.5);
 		this.rows = [];
 		this.sideLength = cellHeight/2;
-		this.gridSize = gridSize;
 
 		// ok now create the start point
 		// this depends on how many rows are in the grid
@@ -24,10 +23,12 @@ class HexGrid {
 		// ODD: origin of the first hex is 0.75*w, 0.5*h
 		let originX = gridSize.y % 2 == 0 ? origin.x + this.cellSize.x : origin.x + (0.75 * this.cellSize.x);
 		this.origin = new vec2(originX, origin.y + (1.25 * this.cellSize.y));
+	}
 
-		for (let x=0; x<gridSize.x; x++) {
+	addRows(): void {
+		for (let x=0; x<this.gridSize.x; x++) {
 			let row = [];
-			for (let y=0; y<gridSize.y; y++) {
+			for (let y=0; y<this.gridSize.y; y++) {
 				let gridPos = new vec2(x, y);
 				row.push(new HexCell(gridPos, this.cellToWorld(gridPos), this.cellRadius, this));
 			}
@@ -53,18 +54,6 @@ class HexGrid {
 				f(this.rows[x][y]);
 			}
 		}
-	}
-
-	getAllCells(): Cell[] {
-		const cells: Cell[] = [];
-
-		this.rows.forEach(row => {
-			row.forEach(c => {
-				cells.push(c);
-			})
-		});
-
-		return cells;
 	}
 }
 
