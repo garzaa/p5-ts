@@ -35,8 +35,8 @@ class Grid {
 		return c;
 	}
 
-	getAllCells(): Cell[] {
-		const cells: Cell[] = [];
+	getAllCells(): SquareCell[] {
+		const cells: SquareCell[] = [];
 
 		this.rows.forEach(row => {
 			row.forEach(c => {
@@ -47,7 +47,7 @@ class Grid {
 		return cells;
 	}
 
-	apply(f: (cell: Cell) => void) {
+	apply(f: (cell: SquareCell) => void) {
 		for (let x=0; x<this.rows.length; x++) {
 			for (let y=0; y<this.rows[x].length; y++) {
 				f(this.rows[x][y]);
