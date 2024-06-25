@@ -47,6 +47,8 @@ function draw(): void {
 function drawCheckers(): void {
 	stroke("black");
 	fill("black");
+	strokeWeight(mazeWeight);
+	strokeCap(PROJECT);
 	boardGrid.apply(drawCheckerSquare);
 }
 	
@@ -56,10 +58,40 @@ function drawCheckerSquare(cell: SquareCell) {
 	if (cell.gridCoords.x % 2 == 0) {
 		if (cell.gridCoords.y % 2 == 0) {
 			makeMaze(cell);
+		} else {
+			let p = cell.getPoints();
+			if (cell.gridCoords.x == 0) {
+				vecLine(p[3], p[0]);
+			} 
+			
+			if (cell.gridCoords.y == cell.grid.rows[cell.gridCoords.x].length - 1) {
+				vecLine(p[2], p[3])
+			}
+
+			if (cell.gridCoords.x == cell.grid.rows.length - 1) {
+				vecLine(p[1], p[2])
+			}
 		}
 	} else {
 		if (cell.gridCoords.y % 2 == 1) {
 			makeMaze(cell);
+		} else {
+			let p = cell.getPoints();
+			if (cell.gridCoords.x == cell.grid.rows.length - 1) {
+				vecLine(p[3], p[0]);
+			}
+			
+			if (cell.gridCoords.y == cell.grid.rows.length - 1) {
+				vecLine(p[2], p[3])
+			}
+
+			if (cell.gridCoords.y == 0) {
+				vecLine(p[0], p[1]);
+			}
+
+			if (cell.gridCoords.x == cell.grid.rows.length - 1) {
+				vecLine(p[1], p[2])
+			}
 		}
 	}
 }
@@ -74,13 +106,8 @@ function makeMaze(cell: SquareCell) {
 }
 
 function drawCell(cell: SquareCell, grid: Grid): void {
-	function vecLine(a: vec2, b: vec2): void {
-		line(a.x, a.y, b.x, b.y);
-	}
 	push();
-		stroke("black");
-		strokeWeight(mazeWeight);
-		strokeCap(PROJECT);
+		
 		// always draw outer lines
 		let p = cell.getPoints();
 
@@ -179,4 +206,8 @@ function getDistance(x1: number, x2: number, y1: number, y2: number): number {
 	let xDist = x2 - x1;
 	let yDist = y2 - y1;
 	return sqrt(xDist*xDist + yDist*yDist);
+}
+
+function vecLine(a: vec2, b: vec2): void {
+	line(a.x, a.y, b.x, b.y);
 }
