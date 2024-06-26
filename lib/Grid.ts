@@ -54,6 +54,17 @@ class Grid {
 			}
 		}
 	}
+
+	applyLtR(f: (cell: SquareCell) => void) {
+		// applies the function row by row instead of column by column
+		// 0th element of every row
+		// then 1st element of every row
+		for (let i=0; i<this.rows.length; i++) {
+			for (let j=0; j<this.rows[i].length; j++) {
+				f(this.rows[j][i]);
+			}
+		}
+	}
 }
 
 class SquareCell extends Cell {
