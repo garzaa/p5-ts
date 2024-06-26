@@ -2,7 +2,7 @@ class Grid {
 	readonly cellSize: vec2;
 	readonly cellRadius: vec2;
 	readonly origin: vec2;
-	readonly rows: SquareCell[][];
+	readonly rows: Cell[][];
 	readonly gridSize: vec2;
 
 	constructor(origin: vec2, gridSize: vec2, cellHeight: number) {
@@ -35,8 +35,8 @@ class Grid {
 		return c;
 	}
 
-	getAllCells(): SquareCell[] {
-		const cells: SquareCell[] = [];
+	getAllCells(): Cell[] {
+		const cells: Cell[] = [];
 
 		this.rows.forEach(row => {
 			row.forEach(c => {
@@ -47,7 +47,7 @@ class Grid {
 		return cells;
 	}
 
-	apply(f: (cell: SquareCell) => void) {
+	apply(f: (cell: Cell) => void) {
 		for (let x=0; x<this.rows.length; x++) {
 			for (let y=0; y<this.rows[x].length; y++) {
 				f(this.rows[x][y]);
@@ -55,7 +55,8 @@ class Grid {
 		}
 	}
 
-	applyLtR(f: (cell: SquareCell) => void) {
+	// TODO: fix this
+	applyLtR(f: (cell: Cell) => void) {
 		// applies the function row by row instead of column by column
 		// 0th element of every row
 		// then 1st element of every row
@@ -72,6 +73,8 @@ class SquareCell extends Cell {
 	readonly grid: Grid;
 	readonly gridCoords: vec2;
 	readonly worldCoords: vec2;
+	// need to do strings because can't override object equality in js
+	readonly connectionDirections: Set<string>;
 
 	constructor(gridCoords: vec2, worldCoords: vec2, radius: vec2, grid: Grid) {
 		super();
@@ -79,6 +82,7 @@ class SquareCell extends Cell {
 		this.worldCoords = worldCoords;
 		this.radius = radius;
 		this.grid = grid;
+		this.connectionDirections = new Set<string>();
 	}
 	
 	getNeighbors(): Cell[] {
@@ -101,6 +105,16 @@ class SquareCell extends Cell {
 		return neighbors;
 	}
 
+	addConnection(cell: Cell): void {
+		super.addConnection(cell);
+		this.connectionDirections.add(cell.gridCoords.sub(this.gridCoords).str());
+	}
+
+	removeConnection(cell: Cell): void {
+		super.removeConnection(cell);
+		this.connectionDirections.delete(cell.gridCoords.sub(this.gridCoords).str());
+	}
+
 	/**
 	 * @returns points in a clockwise order, starting from top left
 	 */
@@ -111,5 +125,9 @@ class SquareCell extends Cell {
 		points.push(this.worldCoords.add(new vec2(this.radius.x, this.radius.y)));
 		points.push(this.worldCoords.add(new vec2(-this.radius.x, this.radius.y)));
 		return points;
+	}
+
+	hasConnection(direction: vec2): boolean {
+		return this.connectionDirections.has(direction.str());
 	}
 }

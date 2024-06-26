@@ -14,18 +14,24 @@ let hedgeLeft: ShadowImage;
 let hedgeRight: ShadowImage;
 let hedgeBottom: ShadowImage;
 
+let benchX: p5.Image;
+let benchY: p5.Image;
 
 let grasses: p5.Image[];
 
 let cellCount = 0;
 let shadowPass = true;
 
+let benchChance = 0.2;
 
 function preload() {
 	hedgeTop = new ShadowImage("hedgeTop");
 	hedgeLeft = new ShadowImage("hedgeLeft");
 	hedgeRight = new ShadowImage("hedgeRight");
 	hedgeBottom = new ShadowImage("hedgeBottom");
+
+	benchX = quickload("benchX");
+	benchY = quickload("benchY");
 
 	grasses = [
 		quickload("grass1"),
@@ -123,6 +129,16 @@ function drawCell(cell: SquareCell): void {
 		if (cell.gridCoords.x == grid.gridSize.x-1) {
 			hedgeRight.draw(cell.worldCoords, shadowPass);
 		}
+
+		// bench X and Y
+		if (cell.hasConnection(vec2.up) && cell.hasConnection(vec2.down) && !cell.hasConnection(vec2.left) && Math.random() < benchChance) {
+			img(benchY, cell.worldCoords);
+		}
+
+		if (cell.hasConnection(vec2.left) && cell.hasConnection(vec2.right) && !cell.hasConnection(vec2.up) && Math.random() < benchChance) {
+			img(benchX, cell.worldCoords);
+		}
+		
 
 		// bottom wall
 		if (cell.gridCoords.y == grid.gridSize.y-1 && cell.gridCoords.x != grid.gridSize.x-1) {

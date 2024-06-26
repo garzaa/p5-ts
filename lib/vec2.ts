@@ -12,7 +12,7 @@ class vec2 {
 	static up = new vec2(0, -1);
 	static right = new vec2(1, 0);
 	static left = new vec2(-1, 0);
-	static down = new vec2(0, 11);
+	static down = new vec2(0, 1);
 
 	add(b: vec2): vec2 {
 		return new vec2(this.x + b.x, this.y + b.y);

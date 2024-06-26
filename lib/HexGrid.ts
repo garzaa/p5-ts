@@ -5,7 +5,7 @@ class HexGrid extends Grid {
 	readonly cellSize: vec2;
 	readonly cellRadius: vec2;
 	readonly origin: vec2;
-	readonly rows: HexCell[][];
+	readonly rows: Cell[][];
 	readonly sideLength: number;
 
 	constructor(origin: vec2, gridSize: vec2, cellHeight: number) {
@@ -48,7 +48,7 @@ class HexGrid extends Grid {
 		return c;
 	}
 
-	apply(f: (cell: HexCell) => void) {
+	apply(f: (cell: Cell) => void) {
 		for (let x=0; x<this.rows.length; x++) {
 			for (let y=0; y<this.rows[x].length; y++) {
 				f(this.rows[x][y]);
