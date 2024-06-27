@@ -3,11 +3,15 @@ abstract class Cell {
 	getConnections(): Cell[] {
 		return Array.from(this.connections);
 	}
-	addConnection(cell: Cell) {
+	addConnection(cell: Cell): void {
 		this.connections.add(cell);
 	}
-	removeConnection(cell: Cell) {
+	removeConnection(cell: Cell): void {
 		this.connections.delete(cell);
+	}
+	addBiConnection(cell: Cell): void {
+		this.addConnection(cell);
+		cell.addConnection(this);
 	}
 
 	gridCoords: vec2;

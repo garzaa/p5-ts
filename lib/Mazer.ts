@@ -9,7 +9,7 @@ const visited = new Set<Cell>();
 		let unvisitedNeighbors: Cell[] = current.getNeighbors().filter(c => !visited.has(c));
 		if (unvisitedNeighbors.length > 0) {
 			stack.push(current);
-			let c = unvisitedNeighbors[Math.floor(Math.random()*unvisitedNeighbors.length)];
+			let c = unvisitedNeighbors[Math.floor(random()*unvisitedNeighbors.length)];
 			c.addConnection(current);
 			current.addConnection(c);
 			visited.add(c);

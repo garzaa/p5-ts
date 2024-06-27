@@ -55,15 +55,22 @@ class Grid {
 		}
 	}
 
-	// TODO: fix this
 	applyLtR(f: (cell: Cell) => void) {
 		// applies the function row by row instead of column by column
 		// 0th element of every row
 		// then 1st element of every row
-		for (let i=0; i<this.rows.length; i++) {
-			for (let j=0; j<this.rows[i].length; j++) {
-				f(this.rows[j][i]);
+		
+		let j = 0;
+		while (j < this.rows[0].length) {
+			let k = 0;
+			while (k < this.rows.length) {
+				// every row 0th element
+				f(this.rows[k][j]);
+				k++
 			}
+			// then every row 1st element
+			// and continue until at last element of row (rows[0].length)
+			j++;
 		}
 	}
 }

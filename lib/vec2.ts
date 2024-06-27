@@ -53,4 +53,8 @@ class vec2 {
 	normalizeNoise(noise: number): number {
 		return noise * 2 - 1;
 	}
+
+	hash(): number {
+		return (this.x*10000) + this.y;
+	}
 }
