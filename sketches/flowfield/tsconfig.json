@@ -1,5 +1,5 @@
 {
 	"extends": "../../tsconfig.json.template",
 	"include": ["../../lib/Quadtree.ts", "../../p5", "./"]
-  }
+}
   

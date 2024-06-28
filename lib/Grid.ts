@@ -73,6 +73,18 @@ class Grid {
 			j++;
 		}
 	}
+
+	applyIso(f: (cell: Cell) => void) {
+		// iso, top to bottom, left to right
+		for (let k = 0; k <= 2 * (this.rows.length - 1); k++) {
+			let yMin = max(0, k - this.rows.length + 1);
+			let yMax = min(this.rows.length - 1, k);
+			for (let y = yMin; y <= yMax; y++) {
+				let x = k - y;
+				f(this.rows[y][x]);
+			}
+		}
+	}
 }
 
 class SquareCell extends Cell {

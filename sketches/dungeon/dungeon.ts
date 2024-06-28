@@ -1,51 +1,40 @@
-const sizeX = 64 * 15;
-const sizeY = 64 * 15;
+const cellSize = 128;
 
-const cellSize = 32;
-const cellAmount = new vec2(24, 24);
+const sizeX = 64 * 16;
+const sizeY = 64 * 16;
+
+const cellAmount = new vec2(6, 6);
 const totalWidth = new vec2(cellSize*cellAmount.x, cellSize*cellAmount.y);
 const margin = new vec2((sizeX - totalWidth.x)/2, (sizeY - totalWidth.y)/2);
 let noiseScale = 0.001;
 
 const grid = new Grid(margin, cellAmount, cellSize);
 
-let hedgeTop: ShadowImage;
-let hedgeLeft: ShadowImage;
-let hedgeRight: ShadowImage;
-let hedgeBottom: ShadowImage;
-
-let benchX: ShadowImage;
-let benchY: ShadowImage;
-
-let grasses: p5.Image[];
-let flowers: p5.Image;
+let cellSquare: XImage;
 
 let cellCount = 0;
 let shadowPass = true;
 
-let benchChance = 0.1;
-let scenery = new Set<number>();
-
 let shadowBuffer: p5.Graphics;
+
+let isoSize = new vec2(cellAmount.x, cellAmount.y/2).scale(cellSize);
+// half isosize up from center
+let isoOrigin = new vec2((sizeX/2), (sizeY/2)-(isoSize.y/2));
+
+let wallTopRight: XImage;
+let wallBottomRight: XImage;
+let wallTopLeft: XImage;
+let wallBottomLeft: XImage;
+
 
 const bigSquares = new Set<string>();
 
 function preload() {
-	hedgeTop = new ShadowImage("hedgeTop");
-	hedgeLeft = new ShadowImage("hedgeLeft");
-	hedgeRight = new ShadowImage("hedgeRight");
-	hedgeBottom = new ShadowImage("hedgeBottom");
-
-	benchX = new ShadowImage("benchX");
-	benchY = new ShadowImage("benchY");
-
-	grasses = [
-		quickload("grass1"),
-		quickload("grass1.5"),
-		quickload("grass2"),
-	];
-
-	flowers = quickload("flowers");
+	cellSquare = new XImage("cellBase");
+	wallTopRight = new XImage("wallTopRight");
+	wallBottomRight = new XImage("wallBottomRight");
+	wallTopLeft = new XImage("wallTopLeft");
+	wallBottomLeft = new XImage("wallBottomLeft");
 }
 
 function setup(): void {
@@ -56,13 +45,14 @@ function setup(): void {
 	hardscale(shadowBuffer);
 
 	imageMode(CENTER);
+	textAlign(CENTER);
 	noLoop();
 	pixelDensity(1);
 
 	const allCells = grid.getAllCells();
 	const startCell = allCells[Math.floor(random() * allCells.length)];
 	carveMaze(startCell);
-	carveBigSquares();
+	// carveBigSquares();
 }
 
 function carveBigSquares(): void {
@@ -111,52 +101,36 @@ function hardscale(buffer: p5.Renderer) {
 }
 
 function draw(): void {
-	background(200);
+	background(50);
 	stroke(50);
 	noFill();
-	// draw the grass squares
+	// draw the basic squares
 	for (let x=margin.x-(cellSize*8); x<sizeX; x+=cellSize) {
 		for (let y=margin.y-(cellSize*8); y<sizeY; y+=cellSize) {
-			let noiseVal = floor(noise(x, y) * 3);
-			let grassTex = grasses[noiseVal];
 			push();
 				translate(x+cellSize/2, y+cellSize/2);
 				if (random() < 0.5) {
 					scale(-1, 1);
 				}
-				img(grassTex, vec2.zero);
 			pop();
 		}
 	}
 
-	// draw flowers
-	for (let x=margin.x-(cellSize*8); x<sizeX; x+=cellSize) {
-		for (let y=margin.y-(cellSize*8); y<sizeY; y+=cellSize) {
-			push();
-				translate(x+cellSize/2, y+cellSize/2);
-				if (noise(x*0.1, y*0.1, 100) < 0.3) {
-					if (random() < 0.5) {
-						scale(-1, 1);
-					}
-					img(flowers, vec2.zero);
-				}
-			pop();
-		}
-	}
+	// draw geometry
+	grid.applyIso(drawGeometry);
+}
 
+function drawShadowPass(): void {
 	// really really bad mixing of global and local variables here but whatever
 	// It Works and it's fine. OK
 	shadowPass = true;
 	grid.applyLtR(drawShadow);
+	push();
 	tint(150, 150, 255, 200);
 	blendMode(MULTIPLY);
 	image(shadowBuffer, sizeX/2 - cellSize, sizeY/2 - cellSize, sizeX, sizeY)
 	shadowPass = false;
-	cellCount = 0;
-
-	tint("white");
-	blendMode(BLEND);
-	grid.applyLtR(drawGeometry);
+	pop();
 }
 
 function drawShadow(cell: SquareCell) {
@@ -169,71 +143,76 @@ function drawGeometry(cell: SquareCell) {
 
 
 function drawCell(cell: SquareCell, shadowPass: boolean): void {
+	let isoCoords = squareToIso(cell.gridCoords);
+	//cellSquare.draw(isoCoords, shadowPass);
+
 	push();
-		// first pass: top wall
 		cell.getUnconnectedNeighbors().forEach(neighbor => {
-			if (neighbor.worldCoords.y < cell.worldCoords.y) {
-				hedgeTop.draw(cell.worldCoords, shadowPass);
+			if (neighbor.gridCoords.y < cell.gridCoords.y) {
+				wallTopRight.draw(isoCoords, shadowPass);
+			} else if (neighbor.gridCoords.x < cell.gridCoords.x) {
+				wallTopLeft.draw(isoCoords, shadowPass);
+			} else if (neighbor.gridCoords.y > cell.gridCoords.y) {
+				wallBottomLeft.draw(isoCoords, shadowPass);
+			} else if (neighbor.gridCoords.x > cell.gridCoords.x) {
+				wallBottomRight.draw(isoCoords, shadowPass);
 			}
 		})
+
+		// top wall
 		if (cell.gridCoords.y == 0 && cell.gridCoords.x > 0) {
-			hedgeTop.draw(cell.worldCoords, shadowPass);
+			wallTopRight.draw(isoCoords, shadowPass);
 		}
 
 		// left wall
-		cell.getUnconnectedNeighbors().forEach(neighbor => {
-			if (neighbor.worldCoords.x < cell.worldCoords.x) {
-				hedgeLeft.draw(cell.worldCoords, shadowPass);
-			}
-		})
 		if (cell.gridCoords.x == 0) {
-			hedgeLeft.draw(cell.worldCoords, shadowPass);
+			wallTopLeft.draw(isoCoords, shadowPass);
 		}
 
 		// right wall
 		if (cell.gridCoords.x == grid.gridSize.x-1) {
-			hedgeRight.draw(cell.worldCoords, shadowPass);
-		}
-
-		// bench X and Y
-		// don't put two benches next to each other
-		if (cell.hasConnection(vec2.up)
-			&& cell.hasConnection(vec2.down)
-			&& !cell.hasConnection(vec2.left)
-			&& random() < benchChance
-			&& !scenery.has(cell.gridCoords.hash())
-		) {
-			benchY.draw(cell.worldCoords, shadowPass);
-			scenery.add(cell.gridCoords.hash());
-			scenery.add(cell.gridCoords.add(vec2.up).hash());
-			scenery.add(cell.gridCoords.add(vec2.down).hash());
-		}
-
-		if (cell.hasConnection(vec2.left)
-			&& cell.hasConnection(vec2.right)
-			&& !cell.hasConnection(vec2.up)
-			&& random(0, 1) < benchChance
-			&& !scenery.has(cell.gridCoords.hash())
-		) {
-			benchX.draw(cell.worldCoords, shadowPass);
-			scenery.add(cell.gridCoords.hash());
-			scenery.add(cell.gridCoords.add(vec2.left).hash());
-			scenery.add(cell.gridCoords.add(vec2.right).hash());
+			wallBottomRight.draw(isoCoords, shadowPass);
 		}
 
 		// bottom wall
 		if (cell.gridCoords.y == grid.gridSize.y-1 && cell.gridCoords.x != grid.gridSize.x-1) {
-			hedgeBottom.draw(cell.worldCoords, shadowPass);
+			wallBottomLeft.draw(isoCoords, shadowPass);
 		}
 
-	pop();
+	// pop();
+
+	stroke(50);
+	rectMode(CENTER);
+	// hmm, maybe this needs to be an IsoGrid...pain?
+	// just do it sloppy for now and then refactor it\
+	// img(cellSquare, isoCoords);
 
 	// if (!shadowPass) {
 	// 	stroke(255);
-	// 	text(cell.gridCoords.str(), cell.worldCoords.x - cellSize/4, cell.worldCoords.y-cellSize/4);
+	// 	text(cellCount++, isoCoords.x, isoCoords.y+cellSize/4);
 	// }
+}
 
-	if (!shadowPass) cellCount++;
+function squareToIso(gridPos: vec2): vec2 {
+	// on an n*n grid rotated 45 degrees clockwise
+	// 0, 0 needs to be in the middle top
+	// 0, n is middle left
+	// n, 0 is middle right
+	// n, n is bottom
+	// start at top middle
+	// move right: x/2
+	// move left: y/2
+	// move down: x/4
+	// move down: y/4;
+	let x = isoOrigin.x;
+	x += gridPos.x/2 * cellSize;
+	x -= gridPos.y/2 * cellSize;
+
+	let y = isoOrigin.y;
+	y += gridPos.x/4 * cellSize;
+	y += gridPos.y/4 * cellSize;
+
+	return new vec2(x, y);
 }
 
 function vecLine(a: vec2, b: vec2): void {
@@ -259,9 +238,25 @@ class ShadowImage {
 }
 
 function quickload(imageName: string): p5.Image {
-	return loadImage("./assets/hedgemaze/"+imageName+".png");
+	return loadImage("./assets/dungeon/"+imageName+".png");
 }
 
 function img(i: p5.Image, worldCoords: vec2) {
 	image(i, worldCoords.x, worldCoords.y, cellSize*2, cellSize*2);
+}
+
+class XImage {
+	readonly mainTex: p5.Image;
+
+	constructor(name: string) {
+		this.mainTex = quickload(name);
+	}
+
+	draw(pos: vec2, shadowPass: boolean=false): void {
+		// if (shadowPass) {
+		// 	shadowBuffer.image(this.shadowTex, pos.x, pos.y, cellSize*2, cellSize*2);
+		// } else {
+			image(this.mainTex, pos.x, pos.y, cellSize*2, cellSize*2);
+		// }
+	}
 }
