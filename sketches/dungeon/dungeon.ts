@@ -117,6 +117,7 @@ function draw(): void {
 	}
 
 	// draw geometry
+	grid.applyIso(drawFloor);
 	grid.applyIso(drawGeometry);
 }
 
@@ -141,10 +142,14 @@ function drawGeometry(cell: SquareCell) {
 	return drawCell(cell, false);
 }
 
+function drawFloor(cell: SquareCell): void {
+	let isoCoords = squareToIso(cell.gridCoords);
+	cellSquare.draw(isoCoords, shadowPass);
+}
 
 function drawCell(cell: SquareCell, shadowPass: boolean): void {
 	let isoCoords = squareToIso(cell.gridCoords);
-	//cellSquare.draw(isoCoords, shadowPass);
+	// cellSquare.draw(isoCoords, shadowPass);
 
 	push();
 		cell.getUnconnectedNeighbors().forEach(neighbor => {
