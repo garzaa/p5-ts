@@ -1,9 +1,9 @@
-const cellSize = 128;
+const cellSize = 64;
 
 const sizeX = 64 * 16;
 const sizeY = 64 * 16;
 
-const cellAmount = new vec2(6, 6);
+const cellAmount = new vec2(12, 12);
 const totalWidth = new vec2(cellSize*cellAmount.x, cellSize*cellAmount.y);
 const margin = new vec2((sizeX - totalWidth.x)/2, (sizeY - totalWidth.y)/2);
 let noiseScale = 0.001;
