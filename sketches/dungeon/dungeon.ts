@@ -3,7 +3,7 @@ const cellSize = 64;
 const sizeX = 64 * 16;
 const sizeY = 64 * 16;
 
-const cellAmount = new vec2(12, 12);
+const cellAmount = new vec2(14, 14);
 const totalWidth = new vec2(cellSize*cellAmount.x, cellSize*cellAmount.y);
 const margin = new vec2((sizeX - totalWidth.x)/2, (sizeY - totalWidth.y)/2);
 let noiseScale = 0.001;
@@ -47,12 +47,12 @@ function setup(): void {
 	imageMode(CENTER);
 	textAlign(CENTER);
 	noLoop();
-	pixelDensity(1);
+	pixelDensity(2);
 
 	const allCells = grid.getAllCells();
 	const startCell = allCells[Math.floor(random() * allCells.length)];
 	carveMaze(startCell);
-	// carveBigSquares();
+	carveBigSquares();
 }
 
 function carveBigSquares(): void {
@@ -101,7 +101,7 @@ function hardscale(buffer: p5.Renderer) {
 }
 
 function draw(): void {
-	background(50);
+	background(0);
 	stroke(50);
 	noFill();
 	// draw the basic squares
@@ -252,16 +252,26 @@ function img(i: p5.Image, worldCoords: vec2) {
 
 class XImage {
 	readonly mainTex: p5.Image;
+	readonly mainTextures: p5.Image[];
 
-	constructor(name: string) {
-		this.mainTex = quickload(name);
+	constructor(name: string, numImages: number=1) {
+		this.mainTextures = [];
+		if (numImages > 1) {
+			for (let i=1; i<=numImages; i++) {
+				this.mainTextures.push(quickload(name+""+i))
+			}
+		} else {
+			this.mainTex = quickload(name);
+		}
 	}
 
 	draw(pos: vec2, shadowPass: boolean=false): void {
 		// if (shadowPass) {
 		// 	shadowBuffer.image(this.shadowTex, pos.x, pos.y, cellSize*2, cellSize*2);
 		// } else {
-			image(this.mainTex, pos.x, pos.y, cellSize*2, cellSize*2);
+		if (this.mainTex) image(this.mainTex, pos.x, pos.y, cellSize*2, cellSize*2);
+		else image(this.mainTextures[floor(random(0, this.mainTextures.length))], pos.x, pos.y, cellSize*2, cellSize*2);
+
 		// }
 	}
 }
