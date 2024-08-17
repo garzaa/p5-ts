@@ -23,6 +23,7 @@ class HexGrid extends Grid {
 		// ODD: origin of the first hex is 0.75*w, 0.5*h
 		let originX = gridSize.y % 2 == 0 ? origin.x + this.cellSize.x : origin.x + (0.75 * this.cellSize.x);
 		this.origin = new vec2(originX, origin.y + (1.25 * this.cellSize.y));
+		this.addRows()
 	}
 
 	addRows(): void {

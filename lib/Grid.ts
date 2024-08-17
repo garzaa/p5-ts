@@ -17,6 +17,7 @@ class Grid {
 	}
 
 	addRows(): void {
+		this.rows.length = 0;
 		for (let x=0; x<this.gridSize.x; x++) {
 			let row = [];
 			for (let y=0; y<this.gridSize.y; y++) {
@@ -43,7 +44,6 @@ class Grid {
 				cells.push(c);
 			})
 		});
-
 		return cells;
 	}
 

@@ -1,18 +1,21 @@
+// pen plotter is 1/75 inches from start to pen tip with the ruler edge. otherwise it's 2 inches flat
+// ok yeah 2 inches flat actually with the ruler edge
 const dpi = 96;
-const sizeX = 6 * dpi;
-const sizeY = 18 * dpi;
+const sizeX = 8 * dpi;
+const sizeY = 8 * dpi;
 
 const pointSpacing = 50;
 const noiseScale = 0.001;
-const collisionSize = 5;
+const collisionSize = 6;
 const pointDistance = 2;
-const margin = 1 * dpi;
+const cellDimensions = new vec2(4, 4)
+const margin = new vec2((sizeX - (cellDimensions.x * dpi)) / 2, (sizeY - (cellDimensions.y * dpi))/ 2);
 const maxVertices = 100;
 
-const mazeCellSize = 8;
-const mazeWeight = 4;
+const mazeCellSize = 6;
+const drawGreenCellBorders = false;
 
-const exportSVG = true;
+const exportSVG = false;
 
 const fieldTree = new Quadtree<Circle>({
 	width: sizeX,
@@ -22,15 +25,15 @@ const fieldTree = new Quadtree<Circle>({
 	maxObjects: 10
 })
 
-const boardGrid = new Grid(new vec2(margin, margin), new vec2(4, 16), 1*dpi);
+const boardGrid = new Grid(margin, cellDimensions, 1*dpi);
 
 function setup(): void {
 	// need this in order to make p5-types play nice with the injected SVG renderer
 	// @ts-ignore
-	// createCanvas(sizeX, sizeY, SVG);
-	createCanvas(sizeX, sizeY);
+	if (exportSVG) createCanvas(sizeX, sizeY, SVG);
+	else createCanvas(sizeX, sizeY);
 	noLoop();
-	strokeWeight(2);
+	strokeWeight(4);
 	stroke(50);
 	noFill();
 	angleMode(RADIANS);
@@ -38,16 +41,18 @@ function setup(): void {
 }
 
 function draw(): void {
-	background("#DECCCC");
-	drawFlowField();
+	if (!exportSVG) background(255);
 	drawCheckers();
-	// save("output.svg");
+	if (exportSVG) save("checkers.svg")
+	if (exportSVG) clear();
+	strokeCap(ROUND);
+	drawFlowField();
+	if (exportSVG) save("flowfield.svg");
 }
 
 function drawCheckers(): void {
 	stroke("black");
 	fill("black");
-	strokeWeight(mazeWeight);
 	strokeCap(PROJECT);
 	boardGrid.apply(drawCheckerSquare);
 }
@@ -58,7 +63,7 @@ function drawCheckerSquare(cell: SquareCell) {
 	if (cell.gridCoords.x % 2 == 0) {
 		if (cell.gridCoords.y % 2 == 0) {
 			makeMaze(cell);
-		} else {
+		} else if (drawGreenCellBorders) {
 			let p = cell.getPoints();
 			if (cell.gridCoords.x == 0) {
 				vecLine(p[3], p[0]);
@@ -75,7 +80,7 @@ function drawCheckerSquare(cell: SquareCell) {
 	} else {
 		if (cell.gridCoords.y % 2 == 1) {
 			makeMaze(cell);
-		} else {
+		} else if (drawGreenCellBorders) {
 			let p = cell.getPoints();
 			if (cell.gridCoords.x == cell.grid.rows.length - 1) {
 				vecLine(p[3], p[0]);
@@ -137,9 +142,10 @@ function drawCell(cell: SquareCell, grid: Grid): void {
 }
 
 function drawFlowField(): void {
-	stroke("#cc777c")
-	for (let x=margin; x<=sizeX-margin; x+=pointSpacing/2 * (noise(x))) {
-		for (let y=margin; y<=sizeY-margin; y+=pointSpacing * noise(x, y)) {
+	stroke("red");
+	noFill();
+	for (let x=margin.x; x<=sizeX-margin.x; x+=pointSpacing/2 * (noise(x))) {
+		for (let y=margin.y; y<=sizeY-margin.y; y+=pointSpacing/2 * noise(x, y)) {
 			// ellipse(x, y, 50, 50);
 			// draw until it's either:
 			// 1. out of bounds
@@ -161,8 +167,8 @@ function drawFlowField(): void {
 				}));
 
 				// then sample noise to determine next direction
-				let noiseVariance = 1 + 0.5*map(noise(px * noiseScale, py * noiseScale, 1000), 0, 1, -1, 10);
-				let ang = PI/2 + (PI*(0.75)*(noise(px * noiseScale * noiseVariance, py * noiseScale * noiseVariance)*2 - 1));
+				let noiseVariance = 1 + 0.5*map(noise(px * noiseScale, py * noiseScale, 1000), 0, 1, -1, 5);
+				let ang = PI/2 + (PI*(1)*(noise(px * noiseScale * noiseVariance, py * noiseScale * noiseVariance)*2 - 1));
 				// then move the angle towards down??
 				// move in the direction * 4 px
 				px += cos(ang) * pointDistance;
@@ -180,6 +186,16 @@ function drawFlowField(): void {
 }
 
 function canMakePoint(xPos: number, yPos: number, v: number): boolean {
+	// don't put lines in the checkerboards
+	// convert from pixels to whether or not it's in a checkerboard square
+	// TODO: add a little margin with collisionSize.x
+	let squarePos = new vec2(floor((xPos-margin.x) / dpi), floor((yPos-margin.y) / dpi));
+	if (squarePos.x % 2 == 0 && squarePos.y % 2 == 0) {
+		return false;
+	} else if (squarePos.x % 2 == 1 && squarePos.y % 2 == 1) {
+		return false;``
+	}
+
 	let overlap = fieldTree.retrieve(new Circle({
 		x: xPos,
 		y: yPos,
@@ -196,8 +212,8 @@ function canMakePoint(xPos: number, yPos: number, v: number): boolean {
 		}
 	}
 	
-	return xPos >= (0+margin-50) && xPos <= (sizeX-margin+50)
-		&& yPos >= (0+margin) && yPos <= (sizeY-margin)
+	return xPos >= (0+margin.x) && xPos <= (sizeX-margin.x)
+		&& yPos >= (0+margin.y) && yPos <= (sizeY-margin.y)
 		&& v < maxVertices
 		&& !hasOverlap;
 }
