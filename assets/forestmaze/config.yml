@@ -1,0 +1,8 @@
+tiles:
+- name: grassPath
+  pipeV: grassPipeVertical
+  pipeH: grassPipeHorizontal
+  cornerT: grassLTop
+  cornerB: grassLBottom
+  corner: grassL
+  space: grassFlat
