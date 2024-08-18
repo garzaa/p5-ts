@@ -1,19 +1,16 @@
-
-// TODO: look at pixels for the control color, if found then add some random scenery there
-// TODO: other control pixel colors?
-// TODO: pivot point for things should be the center. waste of more pixels but avoids other issues
-
 const cellSize = 256;
 
-const cellAmount = new vec2(8, 8);
-const margin = new vec2(2*cellSize, 2*cellSize);
+const cellAmount = new vec2(5, 5);
+const margin = new vec2(0, -cellSize*2);
 const canvasSize = cellAmount.scale(cellSize).add(margin);
 
 const grid = new Grid(margin, cellAmount, cellSize);
 
 let isoSize = new vec2(cellAmount.x, cellAmount.y/2).scale(cellSize);
-// half isosize up from center
 let isoOrigin = new vec2((canvasSize.x/2), (canvasSize.y/2)-(isoSize.y/2));
+
+let d1: number[] = [255, 0, 64];
+let d2: number[] = [64, 0, 255];
 
 // now: predefine the image classes for grass etc
 class TiledSquare {
@@ -29,22 +26,28 @@ class TiledSquare {
 	readonly endTL: XImage;
 	readonly TBL: XImage;
 	readonly TTL: XImage;
+	readonly details: p5.Image[];
 
-	constructor(name: string) {
+	constructor(name: string, d: p5.Image[]) {
 		// TODO: add another constructor with control pixels
 		// and quickloading to pass them through to the function
 		this.name = name;
-		this.corner = new XImage(this.name+"Corner");
-		this.cornerB = new XImage(this.name+"CornerB");
-		this.cornerT = new XImage(this.name+"CornerT");
-		this.pipeH = new XImage(this.name+"PipeH");
-		this.pipeV = new XImage(this.name+"PipeV");
-		this.empty = new XImage(this.name+"Empty");
-		this.cross = new XImage(this.name+"Cross");
-		this.endBL = new XImage(this.name+"EndBL");
-		this.endTL = new XImage(this.name+"EndTL");
-		this.TBL = new XImage(this.name+"TBL");
-		this.TTL = new XImage(this.name+"TTL");
+		this.details = d;
+		this.corner = this.load("Corner");
+		this.cornerB = this.load("CornerB");
+		this.cornerT = this.load("CornerT");
+		this.pipeH = this.load("PipeH");
+		this.pipeV = this.load("PipeV");
+		this.empty = this.load("Empty");
+		this.cross = this.load("Cross");
+		this.endBL = this.load("EndBL");
+		this.endTL = this.load("EndTL");
+		this.TBL = this.load("TBL");
+		this.TTL = this.load("TTL");
+	}
+
+	private load(name: string): XImage {
+		return new XImage(this.name+name, d1, this.details);
 	}
 }
 
@@ -53,40 +56,67 @@ function quickload(imageName: string): p5.Image {
 }
 
 class XImage {
+	readonly name: string;
 	readonly mainTex: p5.Image;
-	readonly mainTextures: p5.Image[];
+	readonly c: number[];
+	markedDetails: boolean = false;
 
-	// TODO: preload pixels with object modifiers, then calculate when to do it via Draw
+	detailCoords: vec2[] = [];
+	details: p5.Image[] = [];
 
-	constructor(name: string, numImages: number=1) {
-		this.mainTextures = [];
-		if (numImages > 1) {
-			for (let i=1; i<=numImages; i++) {
-				this.mainTextures.push(quickload(name+""+i))
+	constructor(name: string, c: number[], details: p5.Image[]) {
+		this.mainTex = quickload(name);
+		this.details = details;
+		this.c = c;
+		this.name = name;
+	}
+
+	private markDetails() {
+		this.mainTex.loadPixels();
+		let p = this.mainTex.pixels;
+		for (let i=0; i<this.mainTex.pixels.length; i += 4) {
+			if (p[i]==this.c[0] && p[i+1]==this.c[1] && p[i+2]==this.c[2]) {
+				let v = new vec2(floor(i/4) % this.mainTex.width, floor(floor(i/4) / this.mainTex.height));
+				// convert to distance from center
+				v = v.add(new vec2(-this.mainTex.width/2, -this.mainTex.height/2));
+				this.detailCoords.push(v);
 			}
-		} else {
-			this.mainTex = quickload(name);
 		}
+		this.markedDetails = true;
 	}
 
-	draw(pos: vec2): void {
-		if (this.mainTex) image(this.mainTex, pos.x, pos.y, cellSize, cellSize);
-		else image(this.mainTextures[floor(random(0, this.mainTextures.length))], pos.x, pos.y, cellSize*2, cellSize*2);
-	}
+	draw(pos: vec2, flipped: boolean = false): void {
+		if (!this.markedDetails) this.markDetails();
 
-	drawFlipped(pos: vec2): void {
 		push();
 			translate(pos.x, pos.y);
-			scale(-1, 1);
-			this.draw(new vec2(0, 0));
+			if (flipped) scale(-1, 1);
+			image(this.mainTex, 0, 0, cellSize, cellSize);
+			// TODO: use perlin noise with positions to get specific details (0-1, in the details array?)
+			// also don't compute it at runtime maybe
+			this.detailCoords.forEach(v => {
+				let d: p5.Image = this.details[Math.floor(Math.random() * this.details.length)]
+				push();	
+					translate(v.x, v.y);
+					if (random() > 0.5) {
+						scale(-1, 1);
+					}
+					image(d, 0, 0, d.width, d.height);
+				pop();
+			})
 		pop();
 	}
 }
 
 let grass: TiledSquare;
+let natureDetails: p5.Image[];
 
 function preload(): void {
-	grass = new TiledSquare("grass"); 
+	natureDetails = [
+		quickload("tree1"),
+		quickload("rock1"),
+	];
+	grass = new TiledSquare("grass", natureDetails);
 }
 
 function setup(): void {
@@ -112,22 +142,8 @@ function draw(): void {
 
 function drawCell(cell: SquareCell) {
 	let isoCoords = stoi(cell.gridCoords, cellSize, isoOrigin);
-	// ok, now actually draw the damn thing. LOL
-	// ok maybe instead of matching based on neighbors, combine them and
-	// average the vectors? hmmmm mmmmmm
-	// that would give a unique direction
-	// except of course if they average out...LOL
-	// or wait...USE WORLD COORDS FOR THAT SINCE IT'S ISO LOL
-	// wait no same problem. damn
-	// maybe make positive ones worth twice as much?
-
-	// maybe also branch based on number of connections: zero, one, two, three, four
-	// ok that's maybe more doable
 	let sum = new vec2(0, 0);
 	cell.getConnections().forEach(otherCell => {
-		let toAdd = otherCell.gridCoords.sub(cell.gridCoords);
-		if (toAdd.x > 0)  toAdd.x *= 2;
-		if (toAdd.y > 0) toAdd.y *= 4;
 		sum = sum.add(otherCell.gridCoords.sub(cell.gridCoords));
 	})
 
@@ -140,11 +156,11 @@ function drawCell(cell: SquareCell) {
 			if (v.x < cell.gridCoords.x) {
 				grass.endTL.draw(isoCoords);
 			} else if (v.x > cell.gridCoords.x) {
-				grass.endBL.drawFlipped(isoCoords);
+				grass.endBL.draw(isoCoords, true);
 			} else if (v.y > cell.gridCoords.y) {
 				grass.endBL.draw(isoCoords);
 			} else if (v.y < cell.gridCoords.y) {
-				grass.endTL.drawFlipped(isoCoords);
+				grass.endTL.draw(isoCoords, true);
 			}
 			break;
 		case 2:
@@ -166,7 +182,7 @@ function drawCell(cell: SquareCell) {
 				if (x > 0 && y > 0) {
 					grass.cornerB.draw(isoCoords);
 				} else if (x > 0 && y < 0) {
-					grass.corner.drawFlipped(isoCoords);
+					grass.corner.draw(isoCoords, true);
 				} else if (x < 0 && y < 0) {
 					grass.cornerT.draw(isoCoords);
 				} else if (x < 0 && y > 0) {
@@ -179,9 +195,9 @@ function drawCell(cell: SquareCell) {
 			if (sum.x < 0) {
 				grass.TTL.draw(isoCoords);
 			} else if (sum.x > 0) {
-				grass.TBL.drawFlipped(isoCoords);
+				grass.TBL.draw(isoCoords, true);
 			} else if (sum.y < 0) {
-				grass.TTL.drawFlipped(isoCoords);
+				grass.TTL.draw(isoCoords, true);
 			} else if (sum.y > 0) {
 				grass.TBL.draw(isoCoords);
 			}
@@ -190,5 +206,5 @@ function drawCell(cell: SquareCell) {
 			grass.cross.draw(isoCoords);
 			break;
 	}
-	text(connections.length + ": " + sum.str(), isoCoords.x, isoCoords.y+64);
+	// text(connections.length + ": " + sum.str(), isoCoords.x, isoCoords.y+64);
 }
