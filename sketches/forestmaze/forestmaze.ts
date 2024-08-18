@@ -1,6 +1,6 @@
 const cellSize = 256;
 
-const cellAmount = new vec2(5, 5);
+const cellAmount = new vec2(12, 12);
 const margin = new vec2(0, -cellSize*2);
 const canvasSize = cellAmount.scale(cellSize).add(margin);
 
@@ -9,8 +9,8 @@ const grid = new Grid(margin, cellAmount, cellSize);
 let isoSize = new vec2(cellAmount.x, cellAmount.y/2).scale(cellSize);
 let isoOrigin = new vec2((canvasSize.x/2), (canvasSize.y/2)-(isoSize.y/2));
 
-let d1: number[] = [255, 0, 64];
-let d2: number[] = [64, 0, 255];
+let d1: number[] = [255, 0, 0];
+let d2: number[] = [0, 255, 0];
 
 // now: predefine the image classes for grass etc
 class TiledSquare {
@@ -26,11 +26,9 @@ class TiledSquare {
 	readonly endTL: XImage;
 	readonly TBL: XImage;
 	readonly TTL: XImage;
-	readonly details: p5.Image[];
+	readonly details: p5.Image[][];
 
-	constructor(name: string, d: p5.Image[]) {
-		// TODO: add another constructor with control pixels
-		// and quickloading to pass them through to the function
+	constructor(name: string, d: p5.Image[][]) {
 		this.name = name;
 		this.details = d;
 		this.corner = this.load("Corner");
@@ -62,9 +60,9 @@ class XImage {
 	markedDetails: boolean = false;
 
 	detailCoords: vec2[] = [];
-	details: p5.Image[] = [];
+	details: p5.Image[][] = [];
 
-	constructor(name: string, c: number[], details: p5.Image[]) {
+	constructor(name: string, c: number[], details: p5.Image[][]) {
 		this.mainTex = quickload(name);
 		this.details = details;
 		this.c = c;
@@ -92,10 +90,12 @@ class XImage {
 			translate(pos.x, pos.y);
 			if (flipped) scale(-1, 1);
 			image(this.mainTex, 0, 0, cellSize, cellSize);
-			// TODO: use perlin noise with positions to get specific details (0-1, in the details array?)
-			// also don't compute it at runtime maybe
 			this.detailCoords.forEach(v => {
-				let d: p5.Image = this.details[Math.floor(Math.random() * this.details.length)]
+				// get noise from the position
+				let c = 0.1;
+				let n = Math.round(noise((pos.x+v.x) * c, (pos.y+v.y) * c) * this.details.length);
+				let d1 = this.details[n]
+				let d: p5.Image = d1[Math.floor(Math.random() * d1.length)]
 				push();	
 					translate(v.x, v.y);
 					if (random() > 0.5) {
@@ -109,14 +109,42 @@ class XImage {
 }
 
 let grass: TiledSquare;
-let natureDetails: p5.Image[];
+let treeDetails: p5.Image[];
+let rockDetails: p5.Image[];
+let flowerDetails: p5.Image[];
 
 function preload(): void {
-	natureDetails = [
+	treeDetails = [
 		quickload("tree1"),
-		quickload("rock1"),
+		quickload("tree2"),
+		quickload("tree3"),
 	];
-	grass = new TiledSquare("grass", natureDetails);
+	rockDetails = [
+		quickload("rock1"),
+		quickload("rock1"),
+		quickload("rock4"),
+		quickload("rock4"),
+		quickload("rock4"),
+		quickload("empty"),
+		quickload("empty"),
+		quickload("empty"),
+		quickload("empty"),
+		quickload("empty"),
+		quickload("empty"),
+		quickload("empty"),
+		quickload("empty"),
+		quickload("empty"),
+		quickload("rock4"),
+		quickload("rock2"),
+		quickload("rock2"),
+		quickload("rock3"),
+	];
+	flowerDetails = [
+		quickload("flowers1"),
+		quickload("flowers2"),
+		quickload("flowers3"),
+	]
+	grass = new TiledSquare("grass", [treeDetails, treeDetails, rockDetails, flowerDetails]);
 }
 
 function setup(): void {
