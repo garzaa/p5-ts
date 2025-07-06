@@ -28,7 +28,8 @@ class TiledSquare {
 	readonly TTL: XImage;
 	readonly details: p5.Image[][];
 
-	constructor(name: string, d: p5.Image[][]) {
+	// TODO: figure out a good way to integrate variants for specific tiles
+	constructor(name: string, d: p5.Image[][], variants: string[] = null) {
 		this.name = name;
 		this.details = d;
 		this.corner = this.load("Corner");
@@ -44,8 +45,9 @@ class TiledSquare {
 		this.TTL = this.load("TTL");
 	}
 
-	private load(name: string): XImage {
-		return new XImage(this.name+name, d1, this.details);
+	private load(imageName: string): XImage {
+		// if there's a name in the strings that matches the imageName, grab the number at the end
+		return new XImage(this.name+imageName, d1, this.details);
 	}
 }
 
@@ -83,6 +85,7 @@ class XImage {
 		this.markedDetails = true;
 	}
 
+	// TODO: separate detail pass....pain...
 	draw(pos: vec2, flipped: boolean = false): void {
 		if (!this.markedDetails) this.markDetails();
 
@@ -92,7 +95,7 @@ class XImage {
 			image(this.mainTex, 0, 0, cellSize, cellSize);
 			this.detailCoords.forEach(v => {
 				// get noise from the position
-				let c = 0.1;
+				let c = 0.005;
 				let n = Math.round(noise((pos.x+v.x) * c, (pos.y+v.y) * c) * this.details.length);
 				let d1 = this.details[n]
 				let d: p5.Image = d1[Math.floor(Math.random() * d1.length)]
@@ -157,6 +160,16 @@ function setup(): void {
 	const allCells = grid.getAllCells();
 	const startCell = allCells[Math.floor(random() * allCells.length)];
 	carveMaze(startCell);
+	// remove all cells with dead ends
+	grid.getAllCells().forEach(cell => {
+		if (cell.connections.size == 1) {
+			console.log(cell.getConnections().length);
+			let other = cell.getConnections()[0];
+			other.removeConnection(cell);
+			cell.removeConnection(other);
+			console.log(cell);
+		}
+	});
 }
 
 function draw(): void {
@@ -180,6 +193,14 @@ function drawCell(cell: SquareCell) {
 		case 0:
 			grass.empty.draw(isoCoords);
 		case 1:
+			console.log("checking connections for: ");
+			console.log(connections)
+			console.log(cell.getConnections())
+			console.log(cell.connections)
+			if (connections[0] === undefined) {
+				grass.empty.draw(isoCoords);
+				break;
+			}
 			let v = connections[0].gridCoords;
 			if (v.x < cell.gridCoords.x) {
 				grass.endTL.draw(isoCoords);

@@ -131,7 +131,10 @@ class SquareCell extends Cell {
 
 	removeConnection(cell: Cell): void {
 		super.removeConnection(cell);
+		console.log(this.connectionDirections);
 		this.connectionDirections.delete(cell.gridCoords.sub(this.gridCoords).str());
+		console.log("removing " + cell.gridCoords.sub(this.gridCoords).str());
+		console.log(this.connectionDirections);
 	}
 
 	/**
