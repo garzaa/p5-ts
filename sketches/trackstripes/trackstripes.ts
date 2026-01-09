@@ -7,10 +7,21 @@ const chevronWidth = 64;
 const chevronSpacing = chevronWidth * 3;
 
 function draw(): void {
-	background(255);
-	const detail = 225;
-	fill(detail);
-	noStroke();
+	// chevron
+	// fill(255);
+	// noStroke();
+	// beginShape();
+	// vertex(0, 0);
+	// vertex(1024*.5, 512);
+	// vertex(0, 1024);
+	// vertex(1024*.5, 1024);
+	// vertex(1024, 512);
+	// vertex(1024*.5, 0);
+	// endShape(CLOSE);
+	// background(255);
+	// const detail = 225;
+	// fill(detail);
+	// noStroke();
 
 	push();
 		translate(0, 512);

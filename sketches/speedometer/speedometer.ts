@@ -6,7 +6,7 @@ function setup(): void {
 // TODO: forget about all this bullshit, do a 270 degree arc with gears in the bottom right. god
 // GOD
 function draw(): void {
-	const redline = 180;
+	const redline = 300;
 	const totalArc = TWO_PI*0.75;
 	background(color(0, 0, 0, 0));
 	translate(450, 450);
@@ -38,7 +38,8 @@ function draw(): void {
 		let frac = (i/steps)*totalArc;
 		push();
 			translate(-sin(frac) * radius, cos(frac)*radius);
-			text((i/steps) * redline, 0, 0);
+			const val = Math.round((i/steps) * redline)
+			text(val, 0, 0);
 		pop();
 	}
 
