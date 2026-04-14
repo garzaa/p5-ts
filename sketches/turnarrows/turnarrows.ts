@@ -3,6 +3,7 @@ function setup(): void {
 	noLoop();
 }
 
+const debug = false;
 
 function draw(): void {
 	// make pngs for turn/danger signs
@@ -14,15 +15,17 @@ function draw(): void {
 	fill(0);
 	stroke(0);
 	strokeWeight(2);
-	// line(width/2, 0, width/2, height);
-	// line(0, height/2, width, height/2);
+	if (debug) line(width/2, 0, width/2, height);
+	if (debug) line(0, height/2, width, height/2);
 	noFill();
-	// rect(0, 0, width, height);
+	if (debug) rect(0, 0, width, height);
 	fill(255);
 	noStroke();
-	for (let i=0; i<2048; i+= 64) {
-		for (let j=0; j<2048; j+= 64) {
-			// ellipse(i, j, 2, 2);
+	if (debug) {
+		for (let i=0; i<2048; i+= 64) {
+			for (let j=0; j<2048; j+= 64) {
+				ellipse(i, j, 2, 2);
+			}
 		}
 	}
 	// move towards the center so you can do it again when mirrored
